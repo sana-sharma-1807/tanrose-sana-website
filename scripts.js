@@ -134,8 +134,19 @@ async function loadTimelineEvents() {
   try {
     const eventsRef = collection(db, 'events');
     const querySnapshot = await getDocs(eventsRef);
+
+    // Convert querySnapshot to an array of events
+    const events = [];
     querySnapshot.forEach((doc) => {
       const eventData = doc.data();
+      events.push({ ...eventData, id: doc.id }); // Include the document ID for sorting
+    });
+
+    // Sort events by timestamp (oldest first)
+    events.sort((a, b) => a.timestamp.toMillis() - b.timestamp.toMillis());
+
+    // Display sorted events
+    events.forEach((eventData) => {
       const newEvent = document.createElement('li');
       newEvent.innerHTML = `<strong>${eventData.date}</strong>: ${eventData.description}`;
       timeline.appendChild(newEvent);
