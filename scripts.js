@@ -10,10 +10,11 @@ async function uploadImage(event, folder) {
     const reader = new FileReader();
     reader.onload = async function(e) {
       const photoContainer = document.createElement('div');
-      photoContainer.classList.add('photo');
+      photoContainer.classList.add('photo-icon');
       
       const img = document.createElement('img');
       img.src = e.target.result;
+      img.classList.add('thumbnail');
       photoContainer.appendChild(img);
       
       const imgDescription = document.createElement('div');
@@ -21,12 +22,12 @@ async function uploadImage(event, folder) {
       imgDescription.textContent = description;
       photoContainer.appendChild(imgDescription);
       
-      folder.appendChild(photoContainer);
+      folder.querySelector('.album').appendChild(photoContainer);
 
       // Save the photo to Firestore
       const albumName = folder.querySelector('h3').textContent;
       try {
-        const albumRef = collection(db, 'albums'); // albums collection in Firestore
+        const albumRef = collection(db, 'albums');
         await addDoc(albumRef, {
           albumName: albumName,
           src: e.target.result,
@@ -37,6 +38,24 @@ async function uploadImage(event, folder) {
       } catch (e) {
         console.error('Error adding document: ', e);
       }
+
+      // Add click event to enlarge the image
+      img.addEventListener('click', () => {
+        const enlargedImage = document.createElement('div');
+        enlargedImage.classList.add('enlarged-image-overlay');
+        enlargedImage.innerHTML = `
+          <div class="enlarged-image-container">
+            <img src="${e.target.result}" alt="Enlarged Image">
+            <button class="close-btn">Close</button>
+          </div>
+        `;
+        document.body.appendChild(enlargedImage);
+
+        // Close the enlarged image when clicked
+        enlargedImage.querySelector('.close-btn').addEventListener('click', () => {
+          document.body.removeChild(enlargedImage);
+        });
+      });
     };
     reader.readAsDataURL(file);
   } else {
@@ -64,10 +83,11 @@ async function createFolder() {
         const albumData = doc.data();
         if (albumData.albumName === folderName) {
           const photoContainer = document.createElement('div');
-          photoContainer.classList.add('photo');
+          photoContainer.classList.add('photo-icon');
           
           const img = document.createElement('img');
           img.src = albumData.src;
+          img.classList.add('thumbnail');
           photoContainer.appendChild(img);
           
           const imgDescription = document.createElement('div');
@@ -76,6 +96,24 @@ async function createFolder() {
           photoContainer.appendChild(imgDescription);
           
           folderContainer.querySelector('.album').appendChild(photoContainer);
+
+          // Add click event to enlarge the image
+          img.addEventListener('click', () => {
+            const enlargedImage = document.createElement('div');
+            enlargedImage.classList.add('enlarged-image-overlay');
+            enlargedImage.innerHTML = `
+              <div class="enlarged-image-container">
+                <img src="${albumData.src}" alt="Enlarged Image">
+                <button class="close-btn">Close</button>
+              </div>
+            `;
+            document.body.appendChild(enlargedImage);
+
+            // Close the enlarged image when clicked
+            enlargedImage.querySelector('.close-btn').addEventListener('click', () => {
+              document.body.removeChild(enlargedImage);
+            });
+          });
         }
       });
     } catch (e) {
@@ -131,59 +169,9 @@ async function loadTimelineEvents() {
   }
 }
 
-// Load photo albums from Firestore when the page is loaded
-async function loadPhotoAlbums() {
-  const albumContainer = document.getElementById('album-container');
-  try {
-    const albumRef = collection(db, 'albums');
-    const querySnapshot = await getDocs(albumRef);
-    const albums = {};
-
-    // Group photos by album name
-    querySnapshot.forEach((doc) => {
-      const albumData = doc.data();
-      if (!albums[albumData.albumName]) {
-        albums[albumData.albumName] = [];
-      }
-      albums[albumData.albumName].push(albumData);
-    });
-
-    // Create folders and populate them with photos
-    for (const albumName in albums) {
-      const folderContainer = document.createElement('div');
-      folderContainer.classList.add('folder');
-      folderContainer.innerHTML = 
-        `<h3>${albumName}</h3>
-        <input type="file" accept="image/*" onchange="uploadImage(event, this.parentElement)">
-        <div class="album"></div>`;
-      albumContainer.appendChild(folderContainer);
-
-      const albumDiv = folderContainer.querySelector('.album');
-      albums[albumName].forEach((photo) => {
-        const photoContainer = document.createElement('div');
-        photoContainer.classList.add('photo');
-        
-        const img = document.createElement('img');
-        img.src = photo.src;
-        photoContainer.appendChild(img);
-        
-        const imgDescription = document.createElement('div');
-        imgDescription.classList.add('album-description');
-        imgDescription.textContent = photo.description;
-        photoContainer.appendChild(imgDescription);
-        
-        albumDiv.appendChild(photoContainer);
-      });
-    }
-  } catch (e) {
-    console.error('Error loading photo albums: ', e);
-  }
-}
-
 // Load all data when the page is loaded
 window.onload = async function() {
   await loadTimelineEvents();
-  await loadPhotoAlbums();
 };
 
 // Attach event listeners to buttons after the DOM is loaded
