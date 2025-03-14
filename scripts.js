@@ -1,232 +1,124 @@
 // Access Firebase from the global window object
 const { db, collection, addDoc, getDocs } = window.firebase;
 
-// Function to handle image upload and save to Firestore
-async function uploadImage(event, folder) {
-  const file = event.target.files[0];
-  const description = prompt('Enter a description for the photo:');
-  
+// Function to handle file upload
+async function uploadFile(file) {
+  const description = prompt('Enter a description for the file:');
   if (file && description) {
     const reader = new FileReader();
     reader.onload = async function(e) {
-      const photoContainer = document.createElement('div');
-      photoContainer.classList.add('photo-icon');
-      
-      const img = document.createElement('img');
-      img.src = e.target.result;
-      img.classList.add('thumbnail');
-      photoContainer.appendChild(img);
-      
-      const imgDescription = document.createElement('div');
-      imgDescription.classList.add('album-description');
-      imgDescription.textContent = description;
-      photoContainer.appendChild(imgDescription);
-      
-      folder.querySelector('.album').appendChild(photoContainer);
-
-      // Save the photo to Firestore
-      const albumName = folder.querySelector('h3').textContent;
+      // Save the file to Firestore
       try {
-        const albumRef = collection(db, 'albums');
-        await addDoc(albumRef, {
-          albumName: albumName,
-          src: e.target.result,
+        const filesRef = collection(db, 'files');
+        await addDoc(filesRef, {
           description: description,
+          type: file.type,
+          src: e.target.result,
           timestamp: new Date()
         });
-        console.log('Photo added to Firestore:', { albumName, src: e.target.result, description }); // Log added photo
+        console.log('File added to Firestore:', { description, type: file.type }); // Log added file
+        loadFiles(); // Reload files after upload
       } catch (e) {
-        console.error('Error adding document: ', e);
+        console.error('Error adding file: ', e);
       }
     };
     reader.readAsDataURL(file);
   } else {
-    alert('Please provide a valid image and description.');
+    alert('Please provide a valid file and description.');
   }
 }
 
-// Function to create a new folder (album)
-async function createFolder() {
-  const folderName = prompt('Enter the name of the new album:');
-  if (folderName) {
-    // Save the folder to Firestore
-    try {
-      const foldersRef = collection(db, 'folders');
-      await addDoc(foldersRef, {
-        name: folderName,
-        timestamp: new Date()
-      });
-      console.log('Folder added to Firestore:', folderName); // Log added folder
-    } catch (e) {
-      console.error('Error adding folder: ', e);
-    }
+// Function to display files in the gallery
+function displayFile(fileData) {
+  const galleryContainer = document.getElementById('album-container');
+  const fileItem = document.createElement('div');
+  fileItem.classList.add('file-item');
 
-    // Create the folder in the DOM
-    const folderContainer = document.createElement('div');
-    folderContainer.classList.add('folder');
-    folderContainer.innerHTML = 
-      `<h3>${folderName}</h3>
-      <input type="file" accept="image/*" class="upload-input">
-      <div class="album"></div>
-      <button class="done-btn">Done</button>`;
-    document.getElementById('album-container').appendChild(folderContainer);
-
-    // Attach the uploadImage event listener to the file input
-    const uploadInput = folderContainer.querySelector('.upload-input');
-    uploadInput.addEventListener('change', (event) => uploadImage(event, folderContainer));
-
-    // Load previously saved photos for this album from Firestore
-    try {
-      const albumRef = collection(db, 'albums');
-      const querySnapshot = await getDocs(albumRef);
-      console.log('Loading photos from Firestore for album:', folderName); // Log album name
-      querySnapshot.forEach((doc) => {
-        const albumData = doc.data();
-        console.log('Loaded photo:', albumData); // Log loaded photo
-        if (albumData.albumName === folderName) {
-          const photoContainer = document.createElement('div');
-          photoContainer.classList.add('photo-icon');
-          
-          const img = document.createElement('img');
-          img.src = albumData.src;
-          img.classList.add('thumbnail');
-          photoContainer.appendChild(img);
-          
-          const imgDescription = document.createElement('div');
-          imgDescription.classList.add('album-description');
-          imgDescription.textContent = albumData.description;
-          photoContainer.appendChild(imgDescription);
-          
-          folderContainer.querySelector('.album').appendChild(photoContainer);
-        }
-      });
-    } catch (e) {
-      console.error('Error loading photos: ', e);
-    }
-
-    // Add event listener to the "Done" button
-    folderContainer.querySelector('.done-btn').addEventListener('click', () => {
-      alert('Album saved!'); // Optional: Notify the user
-    });
-  } else {
-    alert('Please enter a valid album name.');
+  if (fileData.type.startsWith('image')) {
+    fileItem.innerHTML = `
+      <img src="${fileData.src}" alt="${fileData.description}" class="file-icon">
+      <div class="file-name">${fileData.description}</div>
+    `;
+  } else if (fileData.type.startsWith('video')) {
+    fileItem.innerHTML = `
+      <video class="file-icon">
+        <source src="${fileData.src}" type="${fileData.type}">
+        Your browser does not support the video tag.
+      </video>
+      <div class="file-name">${fileData.description}</div>
+    `;
   }
+
+  // Add click event to open file in full screen
+  const fileIcon = fileItem.querySelector('.file-icon');
+  fileIcon.addEventListener('click', () => openFullscreen(fileData));
+
+  galleryContainer.appendChild(fileItem);
 }
 
-// Function to load folders from Firestore
-async function loadFolders() {
-  const albumContainer = document.getElementById('album-container');
+// Function to open file in full screen
+function openFullscreen(fileData) {
+  const overlay = document.createElement('div');
+  overlay.classList.add('fullscreen-overlay');
+
+  const content = document.createElement('div');
+  content.classList.add('fullscreen-content');
+
+  if (fileData.type.startsWith('image')) {
+    const img = document.createElement('img');
+    img.src = fileData.src;
+    content.appendChild(img);
+  } else if (fileData.type.startsWith('video')) {
+    const video = document.createElement('video');
+    video.src = fileData.src;
+    video.controls = true;
+    video.autoplay = true;
+    content.appendChild(video);
+  }
+
+  const closeBtn = document.createElement('button');
+  closeBtn.classList.add('close-btn');
+  closeBtn.textContent = 'Close';
+  closeBtn.addEventListener('click', () => document.body.removeChild(overlay));
+
+  overlay.appendChild(content);
+  overlay.appendChild(closeBtn);
+  document.body.appendChild(overlay);
+}
+
+// Function to load files from Firestore
+async function loadFiles() {
+  const galleryContainer = document.getElementById('album-container');
+  galleryContainer.innerHTML = ''; // Clear the gallery before loading
+
   try {
-    const foldersRef = collection(db, 'folders');
-    const querySnapshot = await getDocs(foldersRef);
-    console.log('Loading folders from Firestore'); // Log loading folders
+    const filesRef = collection(db, 'files');
+    const querySnapshot = await getDocs(filesRef);
     querySnapshot.forEach((doc) => {
-      const folderData = doc.data();
-      const folderName = folderData.name;
-
-      // Create the folder in the DOM
-      const folderContainer = document.createElement('div');
-      folderContainer.classList.add('folder');
-      folderContainer.innerHTML = 
-        `<h3>${folderName}</h3>
-        <input type="file" accept="image/*" class="upload-input">
-        <div class="album"></div>
-        <button class="done-btn">Done</button>`;
-      albumContainer.appendChild(folderContainer);
-
-      // Attach the uploadImage event listener to the file input
-      const uploadInput = folderContainer.querySelector('.upload-input');
-      uploadInput.addEventListener('change', (event) => uploadImage(event, folderContainer));
-
-      // Load photos for this folder
-      loadPhotosForFolder(folderName, folderContainer);
+      const fileData = doc.data();
+      displayFile(fileData); // Display each file
     });
   } catch (e) {
-    console.error('Error loading folders: ', e);
+    console.error('Error loading files: ', e);
   }
 }
 
-// Function to load photos for a specific folder
-async function loadPhotosForFolder(folderName, folderContainer) {
-  try {
-    const albumRef = collection(db, 'albums');
-    const querySnapshot = await getDocs(albumRef);
-    console.log('Loading photos for folder:', folderName); // Log loading photos
-    querySnapshot.forEach((doc) => {
-      const albumData = doc.data();
-      if (albumData.albumName === folderName) {
-        const photoContainer = document.createElement('div');
-        photoContainer.classList.add('photo-icon');
-        
-        const img = document.createElement('img');
-        img.src = albumData.src;
-        img.classList.add('thumbnail');
-        photoContainer.appendChild(img);
-        
-        const imgDescription = document.createElement('div');
-        imgDescription.classList.add('album-description');
-        imgDescription.textContent = albumData.description;
-        photoContainer.appendChild(imgDescription);
-        
-        folderContainer.querySelector('.album').appendChild(photoContainer);
-      }
-    });
-  } catch (e) {
-    console.error('Error loading photos: ', e);
-  }
-}
-
-// Function to add events to the timeline
-async function addEvent() {
-  const eventDate = prompt('Enter the date of the event (e.g., 27th Feb 2025):');
-  const eventDescription = prompt('Enter a short description of the event:');
-
-  if (eventDate && eventDescription) {
-    try {
-      const eventsRef = collection(db, 'events');
-      await addDoc(eventsRef, {
-        date: eventDate,
-        description: eventDescription,
-        timestamp: new Date()
-      });
-      console.log('Event added to Firestore:', { date: eventDate, description: eventDescription }); // Log added event
-    } catch (e) {
-      console.error('Error adding event: ', e);
-    }
-  } else {
-    alert('Please fill in both fields.');
-  }
-}
-
-// Load timeline events from Firestore when the page is loaded
-async function loadTimelineEvents() {
-  const timeline = document.getElementById('timeline');
-  try {
-    const eventsRef = collection(db, 'events');
-    const querySnapshot = await getDocs(eventsRef);
-    console.log('Loading timeline events from Firestore'); // Log loading timeline events
-    querySnapshot.forEach((doc) => {
-      const eventData = doc.data();
-      const newEvent = document.createElement('li');
-      newEvent.innerHTML = `<strong>${eventData.date}</strong>: ${eventData.description}`;
-      timeline.appendChild(newEvent);
-    });
-  } catch (e) {
-    console.error('Error loading timeline events: ', e);
-  }
-}
-
-// Load all data when the page is loaded
-window.onload = async function() {
-  await loadTimelineEvents();
-  await loadFolders(); // Load folders and their photos
-};
-
-// Attach event listeners to buttons after the DOM is loaded
+// Attach event listeners
 document.addEventListener('DOMContentLoaded', function() {
-  const addEventButton = document.getElementById('add-event-btn');
-  addEventButton.addEventListener('click', addEvent);
+  const uploadBtn = document.getElementById('upload-btn');
+  const fileInput = document.getElementById('file-input');
 
-  const createAlbumButton = document.getElementById('create-album-btn');
-  createAlbumButton.addEventListener('click', createFolder);
+  // Trigger file input when upload button is clicked
+  uploadBtn.addEventListener('click', () => fileInput.click());
+
+  // Handle file upload
+  fileInput.addEventListener('change', (event) => {
+    const files = event.target.files;
+    for (const file of files) {
+      uploadFile(file);
+    }
+  });
+
+  // Load files when the page is loaded
+  loadFiles();
 });

@@ -52,10 +52,10 @@
     border-radius: 10px;
     border-left: 5px solid #ff94c2;
   }
-
+  
   .story p {
-    font-family: 'Amatic SC', cursive; /* Replace with your preferred font */
-    font-size: 1.2em; /* Adjust size if necessary */
+    font-family: 'Amatic SC', cursive;
+    font-size: 1.2em;
     line-height: 1.8;
   }
   
@@ -85,118 +85,65 @@
     text-align: center;
   }
   
-  /* Pink Album Styling */
-.folder {
-    background-color: #ffcccb; /* Light pink */
-    border: 2px solid #ff69b4; /* Hot pink border */
-    border-radius: 10px;
-    padding: 15px;
-    margin: 10px;
-    width: 200px;
+  .file-item {
+    width: 150px;
     text-align: center;
+    margin: 10px;
+  }
+  
+  .file-icon {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
     cursor: pointer;
   }
   
-  .folder h3 {
-    color: #ff69b4; /* Hot pink text */
-    margin-bottom: 10px;
-  }
-  
-  /* Album Layout */
-  .album {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  
-  /* Photo Icons */
-  .photo-icon {
-    width: 80px;
-    height: 80px;
-    overflow: hidden;
-    border: 2px solid #ff69b4;
-    border-radius: 10px;
-    position: relative;
-  }
-  
-  .photo-icon img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  .album-description {
-    font-size: 12px;
-    color: #333;
-    text-align: center;
+  .file-name {
     margin-top: 5px;
+    font-size: 14px;
+    color: #333;
   }
   
-  /* Enlarged Image Overlay */
-  .enlarged-image-overlay {
+  .fullscreen-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
   }
   
-  .enlarged-image-container {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
+  .fullscreen-content {
+    max-width: 90%;
+    max-height: 90%;
   }
   
-  .enlarged-image-container img {
-    max-width: 90vw;
-    max-height: 90vh;
+  .fullscreen-content img,
+  .fullscreen-content video {
+    max-width: 100%;
+    max-height: 100%;
     border-radius: 10px;
   }
   
   .close-btn {
-    margin-top: 10px;
-    padding: 5px 10px;
+    position: absolute;
+    top: 20px;
+    right: 20px;
     background: #ff69b4;
     color: white;
     border: none;
+    padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
   }
   
   .close-btn:hover {
     background: #ff1493;
-
-  }
-  
-  .album img:hover {
-    transform: scale(1.1);
-  }
-  
-  .album-description {
-    text-align: center;
-    font-size: 1em;
-    color: #6a4e1e;
-  }
-  /* Done Button Styling */
-.done-btn {
-    margin-top: 10px;
-    padding: 5px 10px;
-    background: #ff69b4; /* Hot pink */
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .done-btn:hover {
-    background: #ff1493; /* Darker pink on hover */
   }
   
   footer {
@@ -209,4 +156,3 @@
   footer p {
     font-size: 1.2em;
   }
-  
