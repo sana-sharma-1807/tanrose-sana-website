@@ -13,11 +13,11 @@
     <h1>Tanrose ❤️ Sana</h1>
     <p>Our journey together, one photo at a time...</p>
   </header>
-  
+
   <section class="timeline">
     <h2>Our Timeline</h2>
     <ul id="timeline">
-      <!-- Dynamic Timeline Entries will be added here -->
+      <!-- Timeline Entries will be added dynamically -->
     </ul>
     <button onclick="addEvent()">Add Timeline Event</button>
   </section>
@@ -30,10 +30,11 @@
   <section class="photo-albums">
     <h2>Our Photo Albums</h2>
     <div class="album" id="album">
-      <!-- Dynamic photo upload will go here -->
+      <!-- Dynamic photo albums will go here -->
     </div>
-    <input type="file" id="image-upload" accept="image/*" onchange="uploadImage(event)">
-    <button id="upload-btn">Upload Photo</button>
+    
+    <button onclick="createFolder()">Create Album</button>
+    <div id="album-container"></div>
   </section>
 
   <footer>

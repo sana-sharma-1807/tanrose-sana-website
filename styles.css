@@ -61,6 +61,7 @@
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s;
+    margin-top: 20px;
   }
   
   button:hover {
@@ -96,6 +97,12 @@
   
   .album img:hover {
     transform: scale(1.1);
+  }
+  
+  .album-description {
+    text-align: center;
+    font-size: 1em;
+    color: #6a4e1e;
   }
   
   footer {
