@@ -38,24 +38,6 @@ async function uploadImage(event, folder) {
       } catch (e) {
         console.error('Error adding document: ', e);
       }
-
-      // Add click event to enlarge the image
-      img.addEventListener('click', () => {
-        const enlargedImage = document.createElement('div');
-        enlargedImage.classList.add('enlarged-image-overlay');
-        enlargedImage.innerHTML = `
-          <div class="enlarged-image-container">
-            <img src="${e.target.result}" alt="Enlarged Image">
-            <button class="close-btn">Close</button>
-          </div>
-        `;
-        document.body.appendChild(enlargedImage);
-
-        // Close the enlarged image when clicked
-        enlargedImage.querySelector('.close-btn').addEventListener('click', () => {
-          document.body.removeChild(enlargedImage);
-        });
-      });
     };
     reader.readAsDataURL(file);
   } else {
@@ -73,15 +55,17 @@ async function createFolder() {
       `<h3>${folderName}</h3>
       <input type="file" accept="image/*" onchange="uploadImage(event, this.parentElement)">
       <div class="album"></div>
-      <button class="done-btn">Done</button>`; // Add a "Done" button
+      <button class="done-btn">Done</button>`;
     document.getElementById('album-container').appendChild(folderContainer);
 
     // Load previously saved photos for this album from Firestore
     try {
       const albumRef = collection(db, 'albums');
       const querySnapshot = await getDocs(albumRef);
+      console.log('Loading photos from Firestore for album:', folderName); // Log album name
       querySnapshot.forEach((doc) => {
         const albumData = doc.data();
+        console.log('Loaded photo:', albumData); // Log loaded photo
         if (albumData.albumName === folderName) {
           const photoContainer = document.createElement('div');
           photoContainer.classList.add('photo-icon');
@@ -97,24 +81,6 @@ async function createFolder() {
           photoContainer.appendChild(imgDescription);
           
           folderContainer.querySelector('.album').appendChild(photoContainer);
-
-          // Add click event to enlarge the image
-          img.addEventListener('click', () => {
-            const enlargedImage = document.createElement('div');
-            enlargedImage.classList.add('enlarged-image-overlay');
-            enlargedImage.innerHTML = `
-              <div class="enlarged-image-container">
-                <img src="${albumData.src}" alt="Enlarged Image">
-                <button class="close-btn">Close</button>
-              </div>
-            `;
-            document.body.appendChild(enlargedImage);
-
-            // Close the enlarged image when clicked
-            enlargedImage.querySelector('.close-btn').addEventListener('click', () => {
-              document.body.removeChild(enlargedImage);
-            });
-          });
         }
       });
     } catch (e) {
