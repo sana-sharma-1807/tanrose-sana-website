@@ -6,7 +6,7 @@
   <title>Tanrose ❤️ Sana</title>
   <link href="https://fonts.googleapis.com/css2?family=Amatic+SC&family=Dancing+Script&family=Pacifico&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script src="scripts.js" defer></script>
+  <script src="scripts.js" type="module" defer></script>
 </head>
 <body>
   <header class="hero">
@@ -19,7 +19,7 @@
     <ul id="timeline">
       <!-- Timeline Entries will be added dynamically -->
     </ul>
-    <button onclick="addEvent()">Add New Timeline Event</button>
+    <button id="add-event-btn">Add New Timeline Event</button>
   </section>
 
   <section class="story">
@@ -32,7 +32,7 @@
     <div id="album-container">
       <!-- Dynamic photo albums will go here -->
     </div>
-    <button onclick="createFolder()">Create a New Album</button>
+    <button id="create-album-btn">Create a New Album</button>
   </section>
 
   <footer>

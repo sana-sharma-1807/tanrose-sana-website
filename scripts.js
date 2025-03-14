@@ -1,8 +1,8 @@
-// Import Firestore functions
+// Initialize Firebase (ensure you have Firebase correctly set up)
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, getDocs, doc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
 
-// Your Firebase configuration
+// Your Firebase configuration (replace with your actual credentials)
 const firebaseConfig = {
   apiKey: "AIzaSyAUhwQmx-MojiORgvXquSz5W-Kvv0exipc",
   authDomain: "tanrose-aac1f.firebaseapp.com",
@@ -13,10 +13,8 @@ const firebaseConfig = {
   measurementId: "G-BJNXJ3JM4W"
 };
 
-// Initialize Firebase
+// Initialize Firebase and Firestore
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firestore
 const db = getFirestore(app);
 
 // Function to handle image upload and save to Firestore
@@ -141,3 +139,12 @@ window.onload = async function() {
     timeline.appendChild(newEvent);
   });
 };
+
+// Attach event listeners to buttons after the DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  const addEventButton = document.getElementById('add-event-btn');
+  addEventButton.addEventListener('click', addEvent);
+
+  const createAlbumButton = document.getElementById('create-album-btn');
+  createAlbumButton.addEventListener('click', createFolder);
+});
