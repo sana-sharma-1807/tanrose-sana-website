@@ -7,10 +7,31 @@
   <link href="https://fonts.googleapis.com/css2?family=Amatic+SC&family=Dancing+Script&family=Pacifico&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Your Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyAUhwQmx-MojiORgvXquSz5W-Kvv0exipc",
+      authDomain: "tanrose-aac1f.firebaseapp.com",
+      projectId: "tanrose-aac1f",
+      storageBucket: "tanrose-aac1f.appspot.com",
+      messagingSenderId: "426233210838",
+      appId: "1:426233210838:web:e90a6cd06000a991f7a677",
+      measurementId: "G-BJNXJ3JM4W"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Make Firebase available globally (optional, but useful for debugging)
+    window.firebase = { app, db, collection, addDoc, getDocs };
+  </script>
   <!-- Your scripts.js file -->
-  <script src="scripts.js" defer></script>
+  <script src="scripts.js" type="module" defer></script>
 </head>
 <body>
   <header class="hero">

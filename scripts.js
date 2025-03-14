@@ -1,17 +1,5 @@
-// Initialize Firebase (ensure you have Firebase correctly set up)
-const firebaseConfig = {
-  apiKey: "AIzaSyAUhwQmx-MojiORgvXquSz5W-Kvv0exipc",
-  authDomain: "tanrose-aac1f.firebaseapp.com",
-  projectId: "tanrose-aac1f",
-  storageBucket: "tanrose-aac1f.appspot.com",
-  messagingSenderId: "426233210838",
-  appId: "1:426233210838:web:e90a6cd06000a991f7a677",
-  measurementId: "G-BJNXJ3JM4W"
-};
-
-// Initialize Firebase and Firestore
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// Access Firebase from the global window object
+const { db, collection, addDoc, getDocs } = window.firebase;
 
 // Function to handle image upload and save to Firestore
 async function uploadImage(event, folder) {
@@ -38,8 +26,8 @@ async function uploadImage(event, folder) {
       // Save the photo to Firestore
       const albumName = folder.querySelector('h3').textContent;
       try {
-        const albumRef = db.collection('albums'); // albums collection in Firestore
-        await albumRef.add({
+        const albumRef = collection(db, 'albums'); // albums collection in Firestore
+        await addDoc(albumRef, {
           albumName: albumName,
           src: e.target.result,
           description: description,
@@ -69,8 +57,8 @@ async function createFolder() {
     document.getElementById('album-container').appendChild(folderContainer);
 
     // Load previously saved photos for this album from Firestore
-    const albumRef = db.collection('albums');
-    const querySnapshot = await albumRef.get();
+    const albumRef = collection(db, 'albums');
+    const querySnapshot = await getDocs(albumRef);
     querySnapshot.forEach((doc) => {
       const albumData = doc.data();
       if (albumData.albumName === folderName) {
@@ -107,8 +95,8 @@ async function addEvent() {
 
     // Save the event to Firestore
     try {
-      const eventsRef = db.collection('events');
-      await eventsRef.add({
+      const eventsRef = collection(db, 'events');
+      await addDoc(eventsRef, {
         date: eventDate,
         description: eventDescription,
         timestamp: new Date()
@@ -125,8 +113,8 @@ async function addEvent() {
 // Load timeline events from Firestore when the page is loaded
 window.onload = async function() {
   const timeline = document.getElementById('timeline');
-  const eventsRef = db.collection('events');
-  const querySnapshot = await eventsRef.get();
+  const eventsRef = collection(db, 'events');
+  const querySnapshot = await getDocs(eventsRef);
   querySnapshot.forEach((doc) => {
     const eventData = doc.data();
     const newEvent = document.createElement('li');
