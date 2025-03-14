@@ -49,6 +49,19 @@ async function uploadImage(event, folder) {
 async function createFolder() {
   const folderName = prompt('Enter the name of the new album:');
   if (folderName) {
+    // Save the folder to Firestore
+    try {
+      const foldersRef = collection(db, 'folders');
+      await addDoc(foldersRef, {
+        name: folderName,
+        timestamp: new Date()
+      });
+      console.log('Folder added to Firestore:', folderName); // Log added folder
+    } catch (e) {
+      console.error('Error adding folder: ', e);
+    }
+
+    // Create the folder in the DOM
     const folderContainer = document.createElement('div');
     folderContainer.classList.add('folder');
     folderContainer.innerHTML = 
@@ -100,6 +113,69 @@ async function createFolder() {
   }
 }
 
+// Function to load folders from Firestore
+async function loadFolders() {
+  const albumContainer = document.getElementById('album-container');
+  try {
+    const foldersRef = collection(db, 'folders');
+    const querySnapshot = await getDocs(foldersRef);
+    console.log('Loading folders from Firestore'); // Log loading folders
+    querySnapshot.forEach((doc) => {
+      const folderData = doc.data();
+      const folderName = folderData.name;
+
+      // Create the folder in the DOM
+      const folderContainer = document.createElement('div');
+      folderContainer.classList.add('folder');
+      folderContainer.innerHTML = 
+        `<h3>${folderName}</h3>
+        <input type="file" accept="image/*" class="upload-input">
+        <div class="album"></div>
+        <button class="done-btn">Done</button>`;
+      albumContainer.appendChild(folderContainer);
+
+      // Attach the uploadImage event listener to the file input
+      const uploadInput = folderContainer.querySelector('.upload-input');
+      uploadInput.addEventListener('change', (event) => uploadImage(event, folderContainer));
+
+      // Load photos for this folder
+      loadPhotosForFolder(folderName, folderContainer);
+    });
+  } catch (e) {
+    console.error('Error loading folders: ', e);
+  }
+}
+
+// Function to load photos for a specific folder
+async function loadPhotosForFolder(folderName, folderContainer) {
+  try {
+    const albumRef = collection(db, 'albums');
+    const querySnapshot = await getDocs(albumRef);
+    console.log('Loading photos for folder:', folderName); // Log loading photos
+    querySnapshot.forEach((doc) => {
+      const albumData = doc.data();
+      if (albumData.albumName === folderName) {
+        const photoContainer = document.createElement('div');
+        photoContainer.classList.add('photo-icon');
+        
+        const img = document.createElement('img');
+        img.src = albumData.src;
+        img.classList.add('thumbnail');
+        photoContainer.appendChild(img);
+        
+        const imgDescription = document.createElement('div');
+        imgDescription.classList.add('album-description');
+        imgDescription.textContent = albumData.description;
+        photoContainer.appendChild(imgDescription);
+        
+        folderContainer.querySelector('.album').appendChild(photoContainer);
+      }
+    });
+  } catch (e) {
+    console.error('Error loading photos: ', e);
+  }
+}
+
 // Function to add events to the timeline
 async function addEvent() {
   const eventDate = prompt('Enter the date of the event (e.g., 27th Feb 2025):');
@@ -128,6 +204,7 @@ async function loadTimelineEvents() {
   try {
     const eventsRef = collection(db, 'events');
     const querySnapshot = await getDocs(eventsRef);
+    console.log('Loading timeline events from Firestore'); // Log loading timeline events
     querySnapshot.forEach((doc) => {
       const eventData = doc.data();
       const newEvent = document.createElement('li');
@@ -142,6 +219,7 @@ async function loadTimelineEvents() {
 // Load all data when the page is loaded
 window.onload = async function() {
   await loadTimelineEvents();
+  await loadFolders(); // Load folders and their photos
 };
 
 // Attach event listeners to buttons after the DOM is loaded
