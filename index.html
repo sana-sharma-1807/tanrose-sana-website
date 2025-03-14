@@ -1,45 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tanrose ❤️ Sana</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tanrose ❤️ Sana - Our Love Story</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <header>
+    <h1>Tanrose ❤️ Sana</h1>
+  </header>
 
-    <!-- Header Section -->
-    <header>
-        <h1>Tanrose ❤️ Sana</h1>
-    </header>
+  <section id="timeline">
+    <h2>Our Timeline</h2>
+    <ul id="timeline-events">
+      <li>
+        <span class="date">2025-02-27:</span> When I noticed him
+      </li>
+      <li>
+        <span class="date">2025-03-02:</span> First time we talked over the phone
+      </li>
+      <li>
+        <span class="date">2025-03-04:</span> When we said "I love you" for the first time
+      </li>
+      <li>
+        <span class="date">2025-03-08:</span> When we talked on FaceTime for the first time
+      </li>
+    </ul>
+    <button onclick="addEvent()">Add Event</button>
+  </section>
 
-    <!-- Love Story Section -->
-    <section id="love-story">
-        <h2>Our Love Story</h2>
-        <p>Our journey together started on a beautiful day...</p>
-    </section>
+  <section id="love-story">
+    <h2>Our Love Story</h2>
+    <p>
+      Our journey started in the most beautiful way. From the moment we noticed each other, a spark ignited between us. With each passing day, we grew closer, and we began to understand how deep our feelings were. From the first conversation over the phone to the heartwarming moments we shared on FaceTime, every step brought us closer to the love we share today. 
+    </p>
+  </section>
 
-    <!-- Timeline Section -->
-    <section id="timeline">
-        <h2>Our Timeline</h2>
-        <ul id="timeline-events">
-            <!-- Timeline events will be added dynamically -->
-        </ul>
-    </section>
+  <section id="photo-albums">
+    <h2>Our Photo Albums</h2>
+    <div class="album" id="vacation-album">
+      <h3>Vacation</h3>
+      <div class="photos" id="vacation-photos">
+        <!-- Photos will be added here dynamically -->
+      </div>
+      <button onclick="addPhoto('vacation-photos')">Add Photo</button>
+    </div>
 
-    <!-- Photo Albums Section -->
-    <section id="photo-albums">
-        <h2>Our Photo Albums</h2>
-        <div id="albums-container">
-            <!-- Albums will be displayed here -->
-        </div>
-    </section>
+    <div class="album" id="anniversary-album">
+      <h3>Anniversary</h3>
+      <div class="photos" id="anniversary-photos">
+        <!-- Photos will be added here dynamically -->
+      </div>
+      <button onclick="addPhoto('anniversary-photos')">Add Photo</button>
+    </div>
 
-    <!-- Learn More Button -->
-    <footer>
-        <button id="btn">Learn More</button>
-    </footer>
+    <div class="album" id="family-album">
+      <h3>Family</h3>
+      <div class="photos" id="family-photos">
+        <!-- Photos will be added here dynamically -->
+      </div>
+      <button onclick="addPhoto('family-photos')">Add Photo</button>
+    </div>
+  </section>
 
-    <script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>

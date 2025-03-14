@@ -1,31 +1,35 @@
-// Timeline Events
-const timelineEvents = [
-    { date: "2023-01-01", event: "We met for the first time" },
-    { date: "2023-06-15", event: "Our first date" },
-    { date: "2023-12-25", event: "Our first Christmas together" },
-];
-
-// Dynamically add timeline events
-const timelineList = document.getElementById("timeline-events");
-timelineEvents.forEach(event => {
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${event.date}</strong>: ${event.event}`;
-    timelineList.appendChild(li);
-});
-
-// Create photo albums dynamically
-const albumsContainer = document.getElementById("albums-container");
-const albums = ["Vacation", "Anniversary", "Family"];
-
-albums.forEach(album => {
-    const div = document.createElement("div");
-    div.classList.add("album");
-    div.innerText = album;
-    albumsContainer.appendChild(div);
-});
-
-// Button functionality
-const button = document.getElementById("btn");
-button.addEventListener("click", () => {
-    alert("Thank you for visiting our love story!");
-});
+// Timeline Functions
+function addEvent() {
+    const date = prompt("Enter the event date (e.g., 2025-02-27):");
+    const description = prompt("Enter the event description:");
+    if (date && description) {
+      const ul = document.getElementById("timeline-events");
+      const li = document.createElement("li");
+      li.innerHTML = `<span class="date">${date}:</span> ${description} <button onclick="removeEvent(this)">Remove</button>`;
+      ul.appendChild(li);
+    }
+  }
+  
+  function removeEvent(button) {
+    const li = button.parentNode;
+    li.parentNode.removeChild(li);
+  }
+  
+  // Photo Album Functions
+  function addPhoto(albumId) {
+    const photoUrl = prompt("Enter the photo URL:");
+    if (photoUrl) {
+      const album = document.getElementById(albumId);
+      const photoDiv = album.querySelector(".photos");
+      const newPhoto = document.createElement("img");
+      newPhoto.src = photoUrl;
+      newPhoto.alt = "New Photo";
+      newPhoto.classList.add("photo");
+      photoDiv.appendChild(newPhoto);
+    }
+  }
+  
+  function removePhoto(photoElement) {
+    photoElement.parentNode.removeChild(photoElement);
+  }
+  
