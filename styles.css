@@ -184,6 +184,20 @@
     font-size: 1em;
     color: #6a4e1e;
   }
+  /* Done Button Styling */
+.done-btn {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background: #ff69b4; /* Hot pink */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .done-btn:hover {
+    background: #ff1493; /* Darker pink on hover */
+  }
   
   footer {
     text-align: center;

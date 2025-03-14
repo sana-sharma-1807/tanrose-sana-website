@@ -34,7 +34,7 @@ async function uploadImage(event, folder) {
           description: description,
           timestamp: new Date()
         });
-        console.log('Photo added to Firestore');
+        console.log('Photo added to Firestore:', { albumName, src: e.target.result, description }); // Log added photo
       } catch (e) {
         console.error('Error adding document: ', e);
       }
@@ -72,7 +72,8 @@ async function createFolder() {
     folderContainer.innerHTML = 
       `<h3>${folderName}</h3>
       <input type="file" accept="image/*" onchange="uploadImage(event, this.parentElement)">
-      <div class="album"></div>`;
+      <div class="album"></div>
+      <button class="done-btn">Done</button>`; // Add a "Done" button
     document.getElementById('album-container').appendChild(folderContainer);
 
     // Load previously saved photos for this album from Firestore
@@ -119,6 +120,11 @@ async function createFolder() {
     } catch (e) {
       console.error('Error loading photos: ', e);
     }
+
+    // Add event listener to the "Done" button
+    folderContainer.querySelector('.done-btn').addEventListener('click', () => {
+      alert('Album saved!'); // Optional: Notify the user
+    });
   } else {
     alert('Please enter a valid album name.');
   }
@@ -137,13 +143,7 @@ async function addEvent() {
         description: eventDescription,
         timestamp: new Date()
       });
-      console.log('Event added to Firestore');
-
-      // Add the event to the timeline dynamically
-      const timeline = document.getElementById('timeline');
-      const newEvent = document.createElement('li');
-      newEvent.innerHTML = `<strong>${eventDate}</strong>: ${eventDescription}`;
-      timeline.appendChild(newEvent);
+      console.log('Event added to Firestore:', { date: eventDate, description: eventDescription }); // Log added event
     } catch (e) {
       console.error('Error adding event: ', e);
     }
