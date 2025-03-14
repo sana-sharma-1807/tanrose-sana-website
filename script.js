@@ -1,35 +1,29 @@
-// Timeline Functions
-function addEvent() {
-    const date = prompt("Enter the event date (e.g., 2025-02-27):");
-    const description = prompt("Enter the event description:");
-    if (date && description) {
-      const ul = document.getElementById("timeline-events");
-      const li = document.createElement("li");
-      li.innerHTML = `<span class="date">${date}:</span> ${description} <button onclick="removeEvent(this)">Remove</button>`;
-      ul.appendChild(li);
+// Function to handle image upload
+function uploadImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        document.getElementById('album').appendChild(img);
+      };
+      reader.readAsDataURL(file);
     }
   }
   
-  function removeEvent(button) {
-    const li = button.parentNode;
-    li.parentNode.removeChild(li);
-  }
+  // Function to add new event to the timeline
+  function addEvent() {
+    const timeline = document.getElementById('timeline');
+    const eventDate = prompt('Enter the date of the event (e.g., 27th Feb 2025):');
+    const eventDescription = prompt('Enter a short description of the event:');
   
-  // Photo Album Functions
-  function addPhoto(albumId) {
-    const photoUrl = prompt("Enter the photo URL:");
-    if (photoUrl) {
-      const album = document.getElementById(albumId);
-      const photoDiv = album.querySelector(".photos");
-      const newPhoto = document.createElement("img");
-      newPhoto.src = photoUrl;
-      newPhoto.alt = "New Photo";
-      newPhoto.classList.add("photo");
-      photoDiv.appendChild(newPhoto);
+    if (eventDate && eventDescription) {
+      const newEvent = document.createElement('li');
+      newEvent.innerHTML = `<strong>${eventDate}</strong>: ${eventDescription}`;
+      timeline.appendChild(newEvent);
+    } else {
+      alert('Please fill in both fields.');
     }
-  }
-  
-  function removePhoto(photoElement) {
-    photoElement.parentNode.removeChild(photoElement);
   }
   
