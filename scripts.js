@@ -103,8 +103,59 @@ async function loadFiles() {
   }
 }
 
-// Attach event listeners
+// Function to add events to the timeline
+async function addEvent() {
+  const eventDate = prompt('Enter the date of the event (e.g., 27th Feb 2025):');
+  const eventDescription = prompt('Enter a short description of the event:');
+
+  if (eventDate && eventDescription) {
+    try {
+      const eventsRef = collection(db, 'events');
+      await addDoc(eventsRef, {
+        date: eventDate,
+        description: eventDescription,
+        timestamp: new Date()
+      });
+      console.log('Event added to Firestore:', { date: eventDate, description: eventDescription }); // Log added event
+      loadTimelineEvents(); // Reload timeline after adding event
+    } catch (e) {
+      console.error('Error adding event: ', e);
+    }
+  } else {
+    alert('Please fill in both fields.');
+  }
+}
+
+// Function to load timeline events from Firestore
+async function loadTimelineEvents() {
+  const timeline = document.getElementById('timeline');
+  timeline.innerHTML = ''; // Clear the timeline before loading
+
+  try {
+    const eventsRef = collection(db, 'events');
+    const querySnapshot = await getDocs(eventsRef);
+    querySnapshot.forEach((doc) => {
+      const eventData = doc.data();
+      const newEvent = document.createElement('li');
+      newEvent.innerHTML = `<strong>${eventData.date}</strong>: ${eventData.description}`;
+      timeline.appendChild(newEvent);
+    });
+  } catch (e) {
+    console.error('Error loading timeline events: ', e);
+  }
+}
+
+// Load all data when the page is loaded
+window.onload = async function() {
+  await loadTimelineEvents(); // Load timeline events
+  await loadFiles(); // Load files
+};
+
+// Attach event listeners to buttons after the DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+  const addEventButton = document.getElementById('add-event-btn');
+  addEventButton.addEventListener('click', addEvent);
+
   const uploadBtn = document.getElementById('upload-btn');
   const fileInput = document.getElementById('file-input');
 
@@ -118,7 +169,4 @@ document.addEventListener('DOMContentLoaded', function() {
       uploadFile(file);
     }
   });
-
-  // Load files when the page is loaded
-  loadFiles();
 });
