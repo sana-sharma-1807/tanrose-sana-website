@@ -1,9 +1,9 @@
-// Firebase configuration (replace with your actual credentials)
+// Initialize Firebase (ensure you have Firebase correctly set up)
 const firebaseConfig = {
   apiKey: "AIzaSyAUhwQmx-MojiORgvXquSz5W-Kvv0exipc",
   authDomain: "tanrose-aac1f.firebaseapp.com",
   projectId: "tanrose-aac1f",
-  storageBucket: "tanrose-aac1f.firebasestorage.app",
+  storageBucket: "tanrose-aac1f.appspot.com",
   messagingSenderId: "426233210838",
   appId: "1:426233210838:web:e90a6cd06000a991f7a677",
   measurementId: "G-BJNXJ3JM4W"
@@ -11,7 +11,7 @@ const firebaseConfig = {
 
 // Initialize Firebase and Firestore
 const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(app);
+const db = firebase.firestore();
 
 // Function to handle image upload and save to Firestore
 async function uploadImage(event, folder) {
@@ -62,11 +62,10 @@ async function createFolder() {
   if (folderName) {
     const folderContainer = document.createElement('div');
     folderContainer.classList.add('folder');
-    folderContainer.innerHTML = `
-      <h3>${folderName}</h3>
+    folderContainer.innerHTML = 
+      `<h3>${folderName}</h3>
       <input type="file" accept="image/*" onchange="uploadImage(event, this.parentElement)">
-      <div class="album"></div>
-    `;
+      <div class="album"></div>`;
     document.getElementById('album-container').appendChild(folderContainer);
 
     // Load previously saved photos for this album from Firestore
