@@ -57,26 +57,30 @@ async function createFolder() {
     document.getElementById('album-container').appendChild(folderContainer);
 
     // Load previously saved photos for this album from Firestore
-    const albumRef = collection(db, 'albums');
-    const querySnapshot = await getDocs(albumRef);
-    querySnapshot.forEach((doc) => {
-      const albumData = doc.data();
-      if (albumData.albumName === folderName) {
-        const photoContainer = document.createElement('div');
-        photoContainer.classList.add('photo');
-        
-        const img = document.createElement('img');
-        img.src = albumData.src;
-        photoContainer.appendChild(img);
-        
-        const imgDescription = document.createElement('div');
-        imgDescription.classList.add('album-description');
-        imgDescription.textContent = albumData.description;
-        photoContainer.appendChild(imgDescription);
-        
-        folderContainer.querySelector('.album').appendChild(photoContainer);
-      }
-    });
+    try {
+      const albumRef = collection(db, 'albums');
+      const querySnapshot = await getDocs(albumRef);
+      querySnapshot.forEach((doc) => {
+        const albumData = doc.data();
+        if (albumData.albumName === folderName) {
+          const photoContainer = document.createElement('div');
+          photoContainer.classList.add('photo');
+          
+          const img = document.createElement('img');
+          img.src = albumData.src;
+          photoContainer.appendChild(img);
+          
+          const imgDescription = document.createElement('div');
+          imgDescription.classList.add('album-description');
+          imgDescription.textContent = albumData.description;
+          photoContainer.appendChild(imgDescription);
+          
+          folderContainer.querySelector('.album').appendChild(photoContainer);
+        }
+      });
+    } catch (e) {
+      console.error('Error loading photos: ', e);
+    }
   } else {
     alert('Please enter a valid album name.');
   }
@@ -84,16 +88,10 @@ async function createFolder() {
 
 // Function to add events to the timeline
 async function addEvent() {
-  const timeline = document.getElementById('timeline');
   const eventDate = prompt('Enter the date of the event (e.g., 27th Feb 2025):');
   const eventDescription = prompt('Enter a short description of the event:');
 
   if (eventDate && eventDescription) {
-    const newEvent = document.createElement('li');
-    newEvent.innerHTML = `<strong>${eventDate}</strong>: ${eventDescription}`;
-    timeline.appendChild(newEvent);
-
-    // Save the event to Firestore
     try {
       const eventsRef = collection(db, 'events');
       await addDoc(eventsRef, {
@@ -102,6 +100,12 @@ async function addEvent() {
         timestamp: new Date()
       });
       console.log('Event added to Firestore');
+
+      // Add the event to the timeline dynamically
+      const timeline = document.getElementById('timeline');
+      const newEvent = document.createElement('li');
+      newEvent.innerHTML = `<strong>${eventDate}</strong>: ${eventDescription}`;
+      timeline.appendChild(newEvent);
     } catch (e) {
       console.error('Error adding event: ', e);
     }
@@ -111,16 +115,75 @@ async function addEvent() {
 }
 
 // Load timeline events from Firestore when the page is loaded
-window.onload = async function() {
+async function loadTimelineEvents() {
   const timeline = document.getElementById('timeline');
-  const eventsRef = collection(db, 'events');
-  const querySnapshot = await getDocs(eventsRef);
-  querySnapshot.forEach((doc) => {
-    const eventData = doc.data();
-    const newEvent = document.createElement('li');
-    newEvent.innerHTML = `<strong>${eventData.date}</strong>: ${eventData.description}`;
-    timeline.appendChild(newEvent);
-  });
+  try {
+    const eventsRef = collection(db, 'events');
+    const querySnapshot = await getDocs(eventsRef);
+    querySnapshot.forEach((doc) => {
+      const eventData = doc.data();
+      const newEvent = document.createElement('li');
+      newEvent.innerHTML = `<strong>${eventData.date}</strong>: ${eventData.description}`;
+      timeline.appendChild(newEvent);
+    });
+  } catch (e) {
+    console.error('Error loading timeline events: ', e);
+  }
+}
+
+// Load photo albums from Firestore when the page is loaded
+async function loadPhotoAlbums() {
+  const albumContainer = document.getElementById('album-container');
+  try {
+    const albumRef = collection(db, 'albums');
+    const querySnapshot = await getDocs(albumRef);
+    const albums = {};
+
+    // Group photos by album name
+    querySnapshot.forEach((doc) => {
+      const albumData = doc.data();
+      if (!albums[albumData.albumName]) {
+        albums[albumData.albumName] = [];
+      }
+      albums[albumData.albumName].push(albumData);
+    });
+
+    // Create folders and populate them with photos
+    for (const albumName in albums) {
+      const folderContainer = document.createElement('div');
+      folderContainer.classList.add('folder');
+      folderContainer.innerHTML = 
+        `<h3>${albumName}</h3>
+        <input type="file" accept="image/*" onchange="uploadImage(event, this.parentElement)">
+        <div class="album"></div>`;
+      albumContainer.appendChild(folderContainer);
+
+      const albumDiv = folderContainer.querySelector('.album');
+      albums[albumName].forEach((photo) => {
+        const photoContainer = document.createElement('div');
+        photoContainer.classList.add('photo');
+        
+        const img = document.createElement('img');
+        img.src = photo.src;
+        photoContainer.appendChild(img);
+        
+        const imgDescription = document.createElement('div');
+        imgDescription.classList.add('album-description');
+        imgDescription.textContent = photo.description;
+        photoContainer.appendChild(imgDescription);
+        
+        albumDiv.appendChild(photoContainer);
+      });
+    }
+  } catch (e) {
+    console.error('Error loading photo albums: ', e);
+  }
+}
+
+// Load all data when the page is loaded
+window.onload = async function() {
+  await loadTimelineEvents();
+  await loadPhotoAlbums();
 };
 
 // Attach event listeners to buttons after the DOM is loaded
