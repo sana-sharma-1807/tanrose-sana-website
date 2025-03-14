@@ -1,11 +1,32 @@
-// Function to handle image upload and save to localStorage
-function uploadImage(event, folder) {
+// Import Firestore functions
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc } from "firebase/firestore";
+
+// Your Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyAUhwQmx-MojiORgvXquSz5W-Kvv0exipc",
+  authDomain: "tanrose-aac1f.firebaseapp.com",
+  projectId: "tanrose-aac1f",
+  storageBucket: "tanrose-aac1f.firebasestorage.app",
+  messagingSenderId: "426233210838",
+  appId: "1:426233210838:web:e90a6cd06000a991f7a677",
+  measurementId: "G-BJNXJ3JM4W"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+
+// Initialize Firestore
+const db = getFirestore(app);
+
+// Function to handle image upload and save to Firestore
+async function uploadImage(event, folder) {
   const file = event.target.files[0];
   const description = prompt('Enter a description for the photo:');
   
   if (file && description) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function(e) {
       const photoContainer = document.createElement('div');
       photoContainer.classList.add('photo');
       
@@ -20,11 +41,20 @@ function uploadImage(event, folder) {
       
       folder.appendChild(photoContainer);
 
-      // Save the photo to localStorage
+      // Save the photo to Firestore
       const albumName = folder.querySelector('h3').textContent;
-      let album = JSON.parse(localStorage.getItem(albumName)) || [];
-      album.push({ src: e.target.result, description });
-      localStorage.setItem(albumName, JSON.stringify(album));
+      try {
+        const albumRef = collection(db, 'albums'); // albums collection in Firestore
+        await addDoc(albumRef, {
+          albumName: albumName,
+          src: e.target.result,
+          description: description,
+          timestamp: new Date()
+        });
+        console.log('Photo added to Firestore');
+      } catch (e) {
+        console.error('Error adding document: ', e);
+      }
     };
     reader.readAsDataURL(file);
   } else {
@@ -33,7 +63,7 @@ function uploadImage(event, folder) {
 }
 
 // Function to create a new folder (album)
-function createFolder() {
+async function createFolder() {
   const folderName = prompt('Enter the name of the new album:');
   if (folderName) {
     const folderContainer = document.createElement('div');
@@ -45,23 +75,26 @@ function createFolder() {
     `;
     document.getElementById('album-container').appendChild(folderContainer);
 
-    // Load previously saved photos for this album from localStorage
-    const savedPhotos = JSON.parse(localStorage.getItem(folderName)) || [];
-    const albumDiv = folderContainer.querySelector('.album');
-    savedPhotos.forEach(photo => {
-      const photoContainer = document.createElement('div');
-      photoContainer.classList.add('photo');
-      
-      const img = document.createElement('img');
-      img.src = photo.src;
-      photoContainer.appendChild(img);
-      
-      const imgDescription = document.createElement('div');
-      imgDescription.classList.add('album-description');
-      imgDescription.textContent = photo.description;
-      photoContainer.appendChild(imgDescription);
-      
-      albumDiv.appendChild(photoContainer);
+    // Load previously saved photos for this album from Firestore
+    const albumRef = collection(db, 'albums');
+    const querySnapshot = await getDocs(albumRef);
+    querySnapshot.forEach((doc) => {
+      const albumData = doc.data();
+      if (albumData.albumName === folderName) {
+        const photoContainer = document.createElement('div');
+        photoContainer.classList.add('photo');
+        
+        const img = document.createElement('img');
+        img.src = albumData.src;
+        photoContainer.appendChild(img);
+        
+        const imgDescription = document.createElement('div');
+        imgDescription.classList.add('album-description');
+        imgDescription.textContent = albumData.description;
+        photoContainer.appendChild(imgDescription);
+        
+        folderContainer.querySelector('.album').appendChild(photoContainer);
+      }
     });
   } else {
     alert('Please enter a valid album name.');
@@ -69,7 +102,7 @@ function createFolder() {
 }
 
 // Function to add events to the timeline
-function addEvent() {
+async function addEvent() {
   const timeline = document.getElementById('timeline');
   const eventDate = prompt('Enter the date of the event (e.g., 27th Feb 2025):');
   const eventDescription = prompt('Enter a short description of the event:');
@@ -79,22 +112,32 @@ function addEvent() {
     newEvent.innerHTML = `<strong>${eventDate}</strong>: ${eventDescription}`;
     timeline.appendChild(newEvent);
 
-    // Save the event to localStorage
-    let events = JSON.parse(localStorage.getItem('timelineEvents')) || [];
-    events.push({ date: eventDate, description: eventDescription });
-    localStorage.setItem('timelineEvents', JSON.stringify(events));
+    // Save the event to Firestore
+    try {
+      const eventsRef = collection(db, 'events');
+      await addDoc(eventsRef, {
+        date: eventDate,
+        description: eventDescription,
+        timestamp: new Date()
+      });
+      console.log('Event added to Firestore');
+    } catch (e) {
+      console.error('Error adding event: ', e);
+    }
   } else {
     alert('Please fill in both fields.');
   }
 }
 
-// Load timeline events from localStorage when the page is loaded
-window.onload = function() {
-  const events = JSON.parse(localStorage.getItem('timelineEvents')) || [];
+// Load timeline events from Firestore when the page is loaded
+window.onload = async function() {
   const timeline = document.getElementById('timeline');
-  events.forEach(event => {
+  const eventsRef = collection(db, 'events');
+  const querySnapshot = await getDocs(eventsRef);
+  querySnapshot.forEach((doc) => {
+    const eventData = doc.data();
     const newEvent = document.createElement('li');
-    newEvent.innerHTML = `<strong>${event.date}</strong>: ${event.description}`;
+    newEvent.innerHTML = `<strong>${eventData.date}</strong>: ${eventData.description}`;
     timeline.appendChild(newEvent);
   });
 };
