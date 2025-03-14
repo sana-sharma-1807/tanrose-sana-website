@@ -53,10 +53,14 @@ async function createFolder() {
     folderContainer.classList.add('folder');
     folderContainer.innerHTML = 
       `<h3>${folderName}</h3>
-      <input type="file" accept="image/*" onchange="uploadImage(event, this.parentElement)">
+      <input type="file" accept="image/*" class="upload-input">
       <div class="album"></div>
       <button class="done-btn">Done</button>`;
     document.getElementById('album-container').appendChild(folderContainer);
+
+    // Attach the uploadImage event listener to the file input
+    const uploadInput = folderContainer.querySelector('.upload-input');
+    uploadInput.addEventListener('change', (event) => uploadImage(event, folderContainer));
 
     // Load previously saved photos for this album from Firestore
     try {
