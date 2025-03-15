@@ -63,35 +63,47 @@ function displayFile(fileData) {
   fileItem.classList.add('file-item');
 
   if (fileData.type.startsWith('image')) {
+    // Display images immediately
     fileItem.innerHTML = `
       <img src="${fileData.src}" alt="${fileData.description}" class="file-icon">
       <div class="file-name">${fileData.description}</div>
     `;
+    galleryContainer.appendChild(fileItem);
   } else if (fileData.type.startsWith('video')) {
+    // Display a loading placeholder for videos
+    fileItem.innerHTML = `
+      <div class="video-container">
+        <div class="loading-placeholder">Loading video thumbnail...</div>
+        <video class="file-icon" controls style="display: none;">
+          <source src="${fileData.src}" type="${fileData.type}">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+      <div class="file-name">${fileData.description}</div>
+    `;
+
     // Extract the first frame of the video and use it as the icon
     extractFirstFrame(fileData.src, (thumbnail) => {
-      fileItem.innerHTML = `
-        <div class="video-container">
-          <img src="${thumbnail}" alt="Video Thumbnail" class="video-thumbnail">
-          <video class="file-icon" controls style="display: none;">
-            <source src="${fileData.src}" type="${fileData.type}">
-            Your browser does not support the video tag.
-          </video>
-        </div>
-        <div class="file-name">${fileData.description}</div>
+      const videoContainer = fileItem.querySelector('.video-container');
+      videoContainer.innerHTML = `
+        <img src="${thumbnail}" alt="Video Thumbnail" class="video-thumbnail">
+        <video class="file-icon" controls style="display: none;">
+          <source src="${fileData.src}" type="${fileData.type}">
+          Your browser does not support the video tag.
+        </video>
       `;
 
       // Add click event to play the video when the thumbnail is clicked
-      const videoThumbnail = fileItem.querySelector('.video-thumbnail');
-      const videoElement = fileItem.querySelector('video');
+      const videoThumbnail = videoContainer.querySelector('.video-thumbnail');
+      const videoElement = videoContainer.querySelector('video');
       videoThumbnail.addEventListener('click', () => {
         videoThumbnail.style.display = 'none'; // Hide the thumbnail
         videoElement.style.display = 'block'; // Show the video
         videoElement.play(); // Play the video
       });
-
-      galleryContainer.appendChild(fileItem);
     });
+
+    galleryContainer.appendChild(fileItem);
   }
 }
 
