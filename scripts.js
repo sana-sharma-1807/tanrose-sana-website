@@ -1,6 +1,9 @@
 // Access Firebase from the global window object
 const { db, collection, addDoc, getDocs } = window.firebase;
 
+// Secret code to access the photos
+const SECRET_CODE = "TanroseSana123"; // Change this to your desired secret code
+
 // Function to handle file upload
 async function uploadFile(file) {
   const description = prompt('Enter a description for the file:');
@@ -40,11 +43,9 @@ function displayFile(fileData) {
       <div class="file-name">${fileData.description}</div>
     `;
   } else if (fileData.type.startsWith('video')) {
+    // Use a placeholder image or the first frame of the video as a cover
     fileItem.innerHTML = `
-      <video class="file-icon">
-        <source src="${fileData.src}" type="${fileData.type}">
-        Your browser does not support the video tag.
-      </video>
+      <img src="https://via.placeholder.com/150" alt="${fileData.description}" class="file-icon">
       <div class="file-name">${fileData.description}</div>
     `;
   }
@@ -90,6 +91,13 @@ function openFullscreen(fileData) {
 async function loadFiles() {
   const galleryContainer = document.getElementById('album-container');
   galleryContainer.innerHTML = ''; // Clear the gallery before loading
+
+  // Prompt for secret code
+  const userCode = prompt('Enter the secret code to view the photos:');
+  if (userCode !== SECRET_CODE) {
+    alert('Incorrect code. Access denied.');
+    return;
+  }
 
   try {
     const filesRef = collection(db, 'files');
