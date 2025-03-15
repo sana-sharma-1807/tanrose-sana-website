@@ -2,14 +2,14 @@
 const { db, collection, addDoc, getDocs } = window.firebase;
 
 // Secret code to access the photos
-const SECRET_CODE = "TanroseSana123"; // Change this to your desired secret code
+const SECRET_CODE = "2702TS"; // Change this to your desired secret code
 
 // Function to handle file upload
 async function uploadFile(file) {
   const description = prompt('Enter a description for the file:');
   if (file && description) {
     const reader = new FileReader();
-    reader.onload = async function(e) {
+    reader.onload = async function (e) {
       // Save the file to Firestore
       try {
         const filesRef = collection(db, 'files');
@@ -17,7 +17,7 @@ async function uploadFile(file) {
           description: description,
           type: file.type,
           src: e.target.result,
-          timestamp: new Date()
+          timestamp: new Date(),
         });
         console.log('File added to Firestore:', { description, type: file.type }); // Log added file
         loadFiles(); // Reload files after upload
@@ -29,6 +29,31 @@ async function uploadFile(file) {
   } else {
     alert('Please provide a valid file and description.');
   }
+}
+
+// Function to extract the first frame of a video
+function extractFirstFrame(videoSrc, callback) {
+  const video = document.createElement('video');
+  video.src = videoSrc;
+  video.crossOrigin = 'anonymous'; // Handle cross-origin issues if any
+  video.muted = true; // Mute the video to avoid autoplay restrictions
+  video.preload = 'metadata'; // Preload metadata to get the first frame
+
+  video.addEventListener('loadedmetadata', () => {
+    video.currentTime = 0.1; // Seek to a small time to capture the first frame
+  });
+
+  video.addEventListener('seeked', () => {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const thumbnail = canvas.toDataURL('image/jpeg'); // Convert canvas to image URL
+    callback(thumbnail);
+  });
+
+  video.load();
 }
 
 // Function to display files in the gallery
@@ -43,18 +68,31 @@ function displayFile(fileData) {
       <div class="file-name">${fileData.description}</div>
     `;
   } else if (fileData.type.startsWith('video')) {
-    // Use a placeholder image or the first frame of the video as a cover
-    fileItem.innerHTML = `
-      <img src="https://via.placeholder.com/150" alt="${fileData.description}" class="file-icon">
-      <div class="file-name">${fileData.description}</div>
-    `;
+    // Extract the first frame of the video and use it as the icon
+    extractFirstFrame(fileData.src, (thumbnail) => {
+      fileItem.innerHTML = `
+        <div class="video-container">
+          <img src="${thumbnail}" alt="Video Thumbnail" class="video-thumbnail">
+          <video class="file-icon" controls style="display: none;">
+            <source src="${fileData.src}" type="${fileData.type}">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+        <div class="file-name">${fileData.description}</div>
+      `;
+
+      // Add click event to play the video when the thumbnail is clicked
+      const videoThumbnail = fileItem.querySelector('.video-thumbnail');
+      const videoElement = fileItem.querySelector('video');
+      videoThumbnail.addEventListener('click', () => {
+        videoThumbnail.style.display = 'none'; // Hide the thumbnail
+        videoElement.style.display = 'block'; // Show the video
+        videoElement.play(); // Play the video
+      });
+
+      galleryContainer.appendChild(fileItem);
+    });
   }
-
-  // Add click event to open file in full screen
-  const fileIcon = fileItem.querySelector('.file-icon');
-  fileIcon.addEventListener('click', () => openFullscreen(fileData));
-
-  galleryContainer.appendChild(fileItem);
 }
 
 // Function to open file in full screen
@@ -122,7 +160,7 @@ async function addEvent() {
       await addDoc(eventsRef, {
         date: eventDate,
         description: eventDescription,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       console.log('Event added to Firestore:', { date: eventDate, description: eventDescription }); // Log added event
       loadTimelineEvents(); // Reload timeline after adding event
@@ -165,13 +203,13 @@ async function loadTimelineEvents() {
 }
 
 // Load all data when the page is loaded
-window.onload = async function() {
+window.onload = async function () {
   await loadTimelineEvents(); // Load timeline events
   await loadFiles(); // Load files
 };
 
 // Attach event listeners to buttons after the DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const addEventButton = document.getElementById('add-event-btn');
   addEventButton.addEventListener('click', addEvent);
 
