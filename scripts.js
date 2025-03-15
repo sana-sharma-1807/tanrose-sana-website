@@ -2,7 +2,7 @@
 const { db, collection, addDoc, getDocs } = window.firebase;
 
 // Secret code to access the photos
-const SECRET_CODE = "2702TS"; // Change this to your desired secret code
+const SECRET_CODE = "TanroseSana123"; // Change this to your desired secret code
 
 // Function to handle file upload
 async function uploadFile(file) {
