@@ -69,6 +69,10 @@ function displayFile(fileData) {
       <div class="file-name">${fileData.description}</div>
     `;
     galleryContainer.appendChild(fileItem);
+
+    // Add click event to open image in full screen
+    const imageElement = fileItem.querySelector('.file-icon');
+    imageElement.addEventListener('click', () => openFullscreen(fileData));
   } else if (fileData.type.startsWith('video')) {
     // Display a loading placeholder for videos
     fileItem.innerHTML = `
@@ -101,6 +105,9 @@ function displayFile(fileData) {
         videoElement.style.display = 'block'; // Show the video
         videoElement.play(); // Play the video
       });
+
+      // Add click event to open video in full screen
+      videoThumbnail.addEventListener('click', () => openFullscreen(fileData));
     });
 
     galleryContainer.appendChild(fileItem);
